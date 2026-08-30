@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İnşaat Stok Takip</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f0f2f5; color: #1c1e21; padding: 16px; padding-bottom: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        /* Dashboard & Header */
+        .header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; text-align: center; }
+        .stats { display: flex; gap: 12px; }
+        .stat-card { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; flex: 1; text-align: center; }
+        .stat-card small { font-size: 12px; opacity: 0.8; display: block; margin-bottom: 4px; }
+        .stat-card span { font-size: 22px; font-weight: bold; }
+
+        /* Card Elements */
+        .card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card h2 { margin-bottom: 16px; font-size: 18px; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #475569; }
+        input, select { width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 16px; background: #fff; outline: none; }
+        input:focus, select:focus { border-color: #2563eb; }
+
+        /* Buttons */
+        .btn { padding: 14px 18px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
+        .btn-primary { background: #2563eb; color: white; width: 100%; margin-top: 8px; font-size: 16px; }
+        .btn-use { background: #16a34a; color: white; flex: 2; font-size: 16px; padding: 16px; }
+        .btn-add { background: #0284c7; color: white; flex: 1; }
+        .btn-delete { background: #dc2626; color: white; flex: 1; }
+        .btn-cancel { background: #64748b; color: white; }
+
+        /* Filters */
+        .filter-container { display: flex; gap: 8px; margin-bottom: 20px; }
+        .filter-btn { flex: 1; padding: 12px; border: 1px solid #cbd5e1; background: white; border-radius: 10px; font-weight: 600; font-size: 14px; color: #475569; }
+        .filter-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+        /* Stock Items */
+        .item-list { display: flex; flex-direction: column; gap: 16px; }
+        .item-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 6px solid #2563eb; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .item-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .badge-kose { background: #fef3c7; color: #d97706; }
+        .badge-duz { background: #e0f2fe; color: #0369a1; }
+        
+        .item-body { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 14px; border-radius: 10px; margin-bottom: 14px; }
+        .stock-label { font-size: 14px; color: #64748b; font-weight: 600; }
+        .stock-count { font-size: 22px; font-weight: 800; color: #0f172a; }
+        
+        .item-actions { display: flex; gap: 8px; }
+
+        /* Modal Confirmation */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
+        .modal { background: white; padding: 24px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .modal h3 { font-size: 18px; color: #0f172a; margin-bottom: 10px; }
+        .modal p { font-size: 15px; color: #475569; margin-bottom: 20px; line-height: 1.4; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons .btn { flex: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏗️ Şantiye Stok Takip</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <small>Malzeme Çeşidi</small>
+                <span id="total-items">0</span>
+            </div>
+            <div class="stat-card">
+                <small>Toplam Stok Adedi</small>
+                <span id="total-quantity">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>➕ Yeni Malzeme Ekle</h2>
+        <div class="form-group">
+            <label>Ürün / Malzeme Adı</label>
+            <input type="text" id="item-name" placeholder="Örn: 40x40 Profil">
+        </div>
+        <div class="form-group">
+            <label>Başlangıç Adedi</label>
+            <input type="number" id="item-qty" placeholder="Örn: 50" min="0">
+        </div>
+        <div class="form-group">
+            <label>Kategori Seçimi</label>
+            <select id="item-category">
+                <option value="Köşe">Köşe</option>
+                <option value="Düz">Düz</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="addItem()">Listeye Ekle</button>
+    </div>
+
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterItems('Hepsi', this)">Tümü</button>
+        <button class="filter-btn" onclick="filterItems('Köşe', this)">Köşe</button>
+        <button class="filter-btn" onclick="filterItems('Düz', this)">Düz</button>
+    </div>
+
+    <div class="item-list" id="item-list"></div>
+</div>
+
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+        <h3 id="modal-title">İşlem Onayı</h3>
+        <p id="modal-msg">Bu işlemi onaylıyor musunuz?</p>
+        <div class="modal-buttons">
+            <button class="btn btn-cancel" onclick="closeModal()">İptal</button>
+            <button class="btn btn-primary" id="modal-confirm-btn">Evet, Onayla</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // LocalStorage kullanarak verileri telefonda kalıcı saklama
+    let items = JSON.parse(localStorage.getItem('insaat_stok_v1')) || [
+        { id: 1, name: 'L Köşe Profil 50mm', quantity: 30, category: 'Köşe' },
+        { id: 2, name: '6 Metre Düz Profil', quantity: 85, category: 'Düz' }
+    ];
+    let currentFilter = 'Hepsi';
+
+    function saveAndRender() {
+        localStorage.setItem('insaat_stok_v1', JSON.stringify(items));
+        renderList();
+    }
+
+    function renderList() {
+        const listEl = document.getElementById('item-list');
+        listEl.innerHTML = '';
+        
+        let filteredItems = items.filter(item => currentFilter === 'Hepsi' || item.category === currentFilter);
+        
+        let totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('total-items').innerText = items.length;
+        document.getElementById('total-quantity').innerText = totalQty;
+
+        if(filteredItems.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; color:#64748b; padding: 30px; background:white; border-radius:16px;">Kayıtlı malzeme bulunamadı.</p>';
+            return;
+        }
+
+        filteredItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            const badgeClass = item.category === 'Köşe' ? 'badge-kose' : 'badge-duz';
+            
+            card.innerHTML = `
+                <div class="item-header">
+                    <span class="item-title">${item.name}</span>
+                    <span class="badge ${badgeClass}">${item.category}</span>
+                </div>
+                <div class="item-body">
+                    <span class="stock-label">Mevcut Adet:</span>
+                    <span class="stock-count">${item.quantity}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="btn btn-use" onclick="requestAction('use', ${item.id})" ${item.quantity <= 0 ? 'disabled style="opacity:0.4"' : ''}>🟢 Kullan (-1)</button>
+                    <button class="btn btn-add" onclick="requestAction('add', ${item.id})">➕ Ekle</button>
+                    <button class="btn btn-delete" onclick="requestAction('delete', ${item.id})">🗑️ Sil</button>
+                </div>
+            `;
+            listEl.appendChild(card);
+        });
+    }
+
+    function addItem() {
+        const name = document.getElementById('item-name').value.trim();
+        const qty = parseInt(document.getElementById('item-qty').value);
+        const category = document.getElementById('item-category').value;
+
+        if(!name || isNaN(qty) || qty < 0) {
+            alert('Lütfen geçerli bir ürün adı ve adedi girin.');
+            return;
+        }
+
+        items.push({ id: Date.now(), name, quantity: qty, category });
+        document.getElementById('item-name').value = '';
+        document.getElementById('item-qty').value = '';
+        saveAndRender();
+    }
+
+    function requestAction(actionType, id) {
+        const item = items.find(i => i.id === id);
+        if(!item) return;
+
+        let msg = "";
+        if(actionType === 'use') msg = `"${item.name}" stok adedini 1 adet düşürmek istediğinize emin misiniz?`;
+        if(actionType === 'add') msg = `"${item.name}" stok adedine 1 adet eklemek istediğinize emin misiniz?`;
+        if(actionType === 'delete') msg = `"${item.name}" malzemesini listeden tamamen silmek istediğinize emin misiniz?`;
+
+        document.getElementById('modal-msg').innerText = msg;
+        document.getElementById('confirm-modal').style.display = 'flex';
+
+        document.getElementById('modal-confirm-btn').onclick = function() {
+            if(actionType === 'use' && item.quantity > 0) item.quantity--;
+            if(actionType === 'add') item.quantity++;
+            if(actionType === 'delete') items = items.filter(i => i.id !== id);
+            
+            closeModal();
+            saveAndRender();
+        };
+    }
+
+    function closeModal() {
+        document.getElementById('confirm-modal').style.display = 'none';
+    }
+
+    function filterItems(category, btn) {
+        currentFilter = category;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderList();
+    }
+
+    renderList();
+</script>
+</body>
+</html>
