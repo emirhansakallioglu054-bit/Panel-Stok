@@ -4,101 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İnşaat Stok Takip</title>
+    <title>İnşaat Stok & Kullanım Takip</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #f0f2f5; color: #1c1e21; padding: 16px; padding-bottom: 40px; }
         .container { max-width: 600px; margin: 0 auto; }
-        
-        /* Dashboard & Header */
-        .header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; text-align: center; }
-        .stats { display: flex; gap: 12px; }
-        .stat-card { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 10px; flex: 1; text-align: center; }
-        .stat-card small { font-size: 12px; opacity: 0.8; display: block; margin-bottom: 4px; }
-        .stat-card span { font-size: 22px; font-weight: bold; }
-
-        /* Card Elements */
+        .header { background: #1e293b; color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; text-align: center; }
+        .stats { display: flex; gap: 12px; margin-top: 12px; }
+        .stat-card { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; flex: 1; }
+        .stat-card span { font-size: 20px; font-weight: bold; display: block; }
         .card { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card h2 { margin-bottom: 16px; font-size: 18px; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-        
-        .form-group { margin-bottom: 14px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #475569; }
-        input, select { width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 16px; background: #fff; outline: none; }
-        input:focus, select:focus { border-color: #2563eb; }
-
-        /* Buttons */
-        .btn { padding: 14px 18px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
-        .btn-primary { background: #2563eb; color: white; width: 100%; margin-top: 8px; font-size: 16px; }
-        .btn-use { background: #16a34a; color: white; flex: 2; font-size: 16px; padding: 16px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; }
+        .btn { padding: 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-use { background: #16a34a; color: white; flex: 2; font-size: 16px; }
         .btn-add { background: #0284c7; color: white; flex: 1; }
         .btn-delete { background: #dc2626; color: white; flex: 1; }
         .btn-cancel { background: #64748b; color: white; }
-
-        /* Filters */
-        .filter-container { display: flex; gap: 8px; margin-bottom: 20px; }
-        .filter-btn { flex: 1; padding: 12px; border: 1px solid #cbd5e1; background: white; border-radius: 10px; font-weight: 600; font-size: 14px; color: #475569; }
-        .filter-btn.active { background: #0f172a; color: white; border-color: #0f172a; }
-
-        /* Stock Items */
-        .item-list { display: flex; flex-direction: column; gap: 16px; }
-        .item-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 6px solid #2563eb; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .item-title { font-size: 18px; font-weight: 700; color: #0f172a; }
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .filter-container { display: flex; gap: 8px; margin-bottom: 16px; }
+        .filter-btn { flex: 1; padding: 10px; border: 1px solid #cbd5e1; background: white; border-radius: 8px; font-weight: 600; }
+        .filter-btn.active { background: #0f172a; color: white; }
+        .item-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 25px; }
+        .item-card { background: white; padding: 16px; border-radius: 16px; border-left: 6px solid #2563eb; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .item-title { font-size: 18px; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
         .badge-kose { background: #fef3c7; color: #d97706; }
         .badge-duz { background: #e0f2fe; color: #0369a1; }
-        
-        .item-body { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 14px; border-radius: 10px; margin-bottom: 14px; }
-        .stock-label { font-size: 14px; color: #64748b; font-weight: 600; }
-        .stock-count { font-size: 22px; font-weight: 800; color: #0f172a; }
-        
+        .item-body { display: flex; justify-content: space-between; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-weight: bold; }
         .item-actions { display: flex; gap: 8px; }
+        
+        /* Geçmiş Kayıtları Stili */
+        .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px; background: #f8fafc; border-radius: 8px; font-size: 13px; border-left: 3px solid #16a34a; }
+        .history-date { color: #64748b; font-size: 11px; }
 
-        /* Modal Confirmation */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
-        .modal { background: white; padding: 24px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .modal h3 { font-size: 18px; color: #0f172a; margin-bottom: 10px; }
-        .modal p { font-size: 15px; color: #475569; margin-bottom: 20px; line-height: 1.4; }
-        .modal-buttons { display: flex; gap: 10px; }
-        .modal-buttons .btn { flex: 1; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 350px; text-align: center; }
+        .modal-buttons { display: flex; gap: 8px; margin-top: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>🏗️ Şantiye Stok Takip</h1>
+        <h2>🏗️ Panel Stok Takip</h2>
         <div class="stats">
-            <div class="stat-card">
-                <small>Malzeme Çeşidi</small>
-                <span id="total-items">0</span>
-            </div>
-            <div class="stat-card">
-                <small>Toplam Stok Adedi</small>
-                <span id="total-quantity">0</span>
-            </div>
+            <div class="stat-card"><small>Çeşit</small><span id="total-items">0</span></div>
+            <div class="stat-card"><small>Toplam Stok</small><span id="total-quantity">0</span></div>
         </div>
     </div>
 
     <div class="card">
-        <h2>➕ Yeni Malzeme Ekle</h2>
+        <h3>➕ Yeni Panel Ekle</h3>
+        <br>
         <div class="form-group">
-            <label>Ürün / Malzeme Adı</label>
-            <input type="text" id="item-name" placeholder="Örn: 40x40 Profil">
+            <label>Panel Adı</label>
+            <input type="text" id="item-name" placeholder="Örn: 50x50 Köşe Paneli">
         </div>
         <div class="form-group">
-            <label>Başlangıç Adedi</label>
-            <input type="number" id="item-qty" placeholder="Örn: 50" min="0">
+            <label>Adet</label>
+            <input type="number" id="item-qty" placeholder="Örn: 100" min="0">
         </div>
         <div class="form-group">
-            <label>Kategori Seçimi</label>
+            <label>Kategori</label>
             <select id="item-category">
                 <option value="Köşe">Köşe</option>
                 <option value="Düz">Düz</option>
             </select>
         </div>
-        <button class="btn btn-primary" onclick="addItem()">Listeye Ekle</button>
+        <button class="btn btn-primary" onclick="addItem()">Kaydet</button>
     </div>
 
     <div class="filter-container">
@@ -108,30 +85,39 @@
     </div>
 
     <div class="item-list" id="item-list"></div>
+
+    <!-- Kullanım Geçmişi Paneli -->
+    <div class="card">
+        <h3>📋 Son Kullanılan Malzemeler</h3>
+        <br>
+        <div class="history-list" id="history-list"></div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="confirm-modal">
     <div class="modal">
-        <h3 id="modal-title">İşlem Onayı</h3>
-        <p id="modal-msg">Bu işlemi onaylıyor musunuz?</p>
+        <h3>İşlem Onayı</h3>
+        <p id="modal-msg" style="margin-top:8px; color:#475569;"></p>
         <div class="modal-buttons">
             <button class="btn btn-cancel" onclick="closeModal()">İptal</button>
-            <button class="btn btn-primary" id="modal-confirm-btn">Evet, Onayla</button>
+            <button class="btn btn-primary" id="modal-confirm-btn">Evet</button>
         </div>
     </div>
 </div>
 
 <script>
-    // LocalStorage kullanarak verileri telefonda kalıcı saklama
-    let items = JSON.parse(localStorage.getItem('insaat_stok_v1')) || [
-        { id: 1, name: 'L Köşe Profil 50mm', quantity: 30, category: 'Köşe' },
-        { id: 2, name: '6 Metre Düz Profil', quantity: 85, category: 'Düz' }
+    let items = JSON.parse(localStorage.getItem('insaat_panel_stok_v2')) || [
+        { id: 1, name: 'Köşe Paneli 90°', quantity: 50, category: 'Köşe' },
+        { id: 2, name: 'Düz Duvar Paneli', quantity: 150, category: 'Düz' }
     ];
+    let usageLogs = JSON.parse(localStorage.getItem('insaat_panel_logs')) || [];
     let currentFilter = 'Hepsi';
 
     function saveAndRender() {
-        localStorage.setItem('insaat_stok_v1', JSON.stringify(items));
+        localStorage.setItem('insaat_panel_stok_v2', JSON.stringify(items));
+        localStorage.setItem('insaat_panel_logs', JSON.stringify(usageLogs));
         renderList();
+        renderLogs();
     }
 
     function renderList() {
@@ -145,7 +131,7 @@
         document.getElementById('total-quantity').innerText = totalQty;
 
         if(filteredItems.length === 0) {
-            listEl.innerHTML = '<p style="text-align:center; color:#64748b; padding: 30px; background:white; border-radius:16px;">Kayıtlı malzeme bulunamadı.</p>';
+            listEl.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px; background:white; border-radius:12px;">Henüz panel eklenmedi.</p>';
             return;
         }
 
@@ -160,16 +146,39 @@
                     <span class="badge ${badgeClass}">${item.category}</span>
                 </div>
                 <div class="item-body">
-                    <span class="stock-label">Mevcut Adet:</span>
-                    <span class="stock-count">${item.quantity}</span>
+                    <span>Mevcut Adet:</span>
+                    <span style="font-size:20px;">${item.quantity}</span>
                 </div>
                 <div class="item-actions">
                     <button class="btn btn-use" onclick="requestAction('use', ${item.id})" ${item.quantity <= 0 ? 'disabled style="opacity:0.4"' : ''}>🟢 Kullan (-1)</button>
                     <button class="btn btn-add" onclick="requestAction('add', ${item.id})">➕ Ekle</button>
-                    <button class="btn btn-delete" onclick="requestAction('delete', ${item.id})">🗑️ Sil</button>
+                    <button class="btn btn-delete" onclick="requestAction('delete', ${item.id})">🗑️</button>
                 </div>
             `;
             listEl.appendChild(card);
+        });
+    }
+
+    function renderLogs() {
+        const historyEl = document.getElementById('history-list');
+        historyEl.innerHTML = '';
+
+        if(usageLogs.length === 0) {
+            historyEl.innerHTML = '<p style="text-align:center; color:#64748b; font-size:13px;">Henüz kullanım kaydı yok.</p>';
+            return;
+        }
+
+        usageLogs.slice().reverse().forEach(log => {
+            const logItem = document.createElement('div');
+            logItem.className = 'history-item';
+            logItem.innerHTML = `
+                <div>
+                    <strong>${log.name}</strong> (${log.category})
+                    <div class="history-date">${log.date}</div>
+                </div>
+                <div style="font-weight:bold; color:#16a34a;">-1 Adet</div>
+            `;
+            historyEl.appendChild(logItem);
         });
     }
 
@@ -179,7 +188,7 @@
         const category = document.getElementById('item-category').value;
 
         if(!name || isNaN(qty) || qty < 0) {
-            alert('Lütfen geçerli bir ürün adı ve adedi girin.');
+            alert('Lütfen panel adı ve adedi girin.');
             return;
         }
 
@@ -194,15 +203,20 @@
         if(!item) return;
 
         let msg = "";
-        if(actionType === 'use') msg = `"${item.name}" stok adedini 1 adet düşürmek istediğinize emin misiniz?`;
-        if(actionType === 'add') msg = `"${item.name}" stok adedine 1 adet eklemek istediğinize emin misiniz?`;
-        if(actionType === 'delete') msg = `"${item.name}" malzemesini listeden tamamen silmek istediğinize emin misiniz?`;
+        if(actionType === 'use') msg = `"${item.name}" stoktan 1 adet düşülsün mü?`;
+        if(actionType === 'add') msg = `"${item.name}" stok adedi 1 artırılsın mı?`;
+        if(actionType === 'delete') msg = `"${item.name}" panelini silmek istediğinize emin misiniz?`;
 
         document.getElementById('modal-msg').innerText = msg;
         document.getElementById('confirm-modal').style.display = 'flex';
 
         document.getElementById('modal-confirm-btn').onclick = function() {
-            if(actionType === 'use' && item.quantity > 0) item.quantity--;
+            if(actionType === 'use' && item.quantity > 0) {
+                item.quantity--;
+                const now = new Date();
+                const timeString = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
+                usageLogs.push({ name: item.name, category: item.category, date: timeString });
+            }
             if(actionType === 'add') item.quantity++;
             if(actionType === 'delete') items = items.filter(i => i.id !== id);
             
@@ -222,7 +236,7 @@
         renderList();
     }
 
-    renderList();
+    saveAndRender();
 </script>
 </body>
 </html>
